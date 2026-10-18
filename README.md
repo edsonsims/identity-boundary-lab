@@ -117,6 +117,7 @@ constructs the tenant/role filter before top-k and answer generation.
 | Original reports, offline | `urn:identity-boundary:reports:jwt` | `reports:read` |
 | Original reports, online | `urn:identity-boundary:reports:opaque` | `reports:read` |
 | Connected RAG, JWT only | `urn:identity-boundary:rag` | `rag:query` |
+| Durable approval, JWT only | `urn:identity-boundary:approval` | `approval:request`, `approval:read`, `approval:decide` |
 
 A reports token cannot authorize the RAG endpoint. Reader fixtures can retrieve
 general tenant documents; analyst fixtures carry both `reader` and `analyst` roles
@@ -134,6 +135,28 @@ The RAG resource independently fetches discovery/JWKS and validates the JWT; it
 trusts no identity headers injected by a gateway. Its
 [design notes](https://github.com/edsonsims/enterprise-ai-lab/blob/main/docs/identity-rag.md)
 cover permissions, index updates, offline token lifetime and generation limits.
+
+### Follow an approval through a durable workflow
+
+The [approval study](https://github.com/edsonsims/enterprise-ai-lab/blob/main/docs/durable-approval.md)
+uses the same real issuer with a separate audience. `requester-alpha` and
+`requester-beta` receive request/read scopes; `approver-alpha` and `approver-beta`
+receive decide/read scopes. The `dual-alpha` fixture exercises rejection of
+self-approval even when both roles are present. Token scopes stay bounded by the
+issuer-assigned roles; unsupported requested scopes are omitted from the token,
+and the resource still checks the required scope and role.
+
+Enterprise AI Lab verifies the original JWT before submitting an immutable
+tenant/content/deadline snapshot to actual Temporal. Its demo restarts a
+persistent local server, kills a worker after a SQLite effect commits, and
+replays exported histories. Only a synthetic local note is published. RAG tokens
+cannot authorize approval endpoints, and approval tokens cannot query RAG.
+
+These are **scripted service identities**, not authenticated people or a record
+of human review. The dedicated audience adds no browser sign-in or production
+identity lifecycle. Tokens still expire within 60 seconds and use the resource's
+startup public-key snapshot. The private bridge transports tokens only to its
+parent process; raw messages must not be saved in workflow histories or reports.
 
 ## What the tests exercise
 

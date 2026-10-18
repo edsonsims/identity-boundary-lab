@@ -47,3 +47,18 @@ vector persistence and tenant/role retrieval; its own CI and recorded observatio
 are the evidence for that side. This remains automated verification, not owner
 study or human review. RAG JWTs retain the same offline revocation/key-snapshot
 limitations as other structured access tokens.
+
+The durable-approval companion adds a dedicated JWT audience and role-bounded
+request/read/decide scopes, also developed with Codex. Requester, approver and
+dual-role service fixtures exercise independent-review and self-approval rules
+in the Python/Temporal companion. They do not establish that a human reviewed or
+approved a document. New Node tests obtain actual provider-issued tokens, verify
+their signatures and check that unpermitted scopes are omitted and that audience swapping fails. Temporal
+persistence, worker crash recovery and history replay are verified and recorded
+in Enterprise AI Lab, separately from the issuer tests here.
+
+The approval audience extension passed **89 Node 24.19.0 tests** locally. The
+provider omits unsupported scopes from issued tokens; the tests check the granted
+scopes and the resource independently requires its scope and role. They do not
+assume every unsupported scope request produces an OAuth error. The existing
+reports/RAG audiences and their validation/revocation behavior remain covered.
