@@ -7,11 +7,15 @@ import { close, listen } from './http.js';
 export const JWT_RESOURCE = 'urn:identity-boundary:reports:jwt';
 export const OPAQUE_RESOURCE = 'urn:identity-boundary:reports:opaque';
 export const READ_SCOPE = 'reports:read';
+export const RAG_RESOURCE = 'urn:identity-boundary:rag';
+export const RAG_SCOPE = 'rag:query';
 export const TOKEN_TTL_SECONDS = 60;
 export const PROFILES = Object.freeze({
   'reader-alpha': Object.freeze({ tenantId: 'alpha', roles: Object.freeze(['reader']) }),
   'reader-beta': Object.freeze({ tenantId: 'beta', roles: Object.freeze(['reader']) }),
   'observer-alpha': Object.freeze({ tenantId: 'alpha', roles: Object.freeze(['observer']) }),
+  'analyst-alpha': Object.freeze({ tenantId: 'alpha', roles: Object.freeze(['reader', 'analyst']) }),
+  'analyst-beta': Object.freeze({ tenantId: 'beta', roles: Object.freeze(['reader', 'analyst']) }),
 });
 export type FixtureClientId = keyof typeof PROFILES;
 export interface Credential { clientId: string; clientSecret: string }
@@ -54,11 +58,11 @@ export async function startIssuer(options: { port?: number; signingJwk?: JWK; tt
           enabled: true,
           defaultResource: () => { throw new errors.InvalidTarget('Provide an explicit supported resource.'); },
           getResourceServerInfo: (_ctx, resource, client) => {
-            if (!Object.hasOwn(PROFILES, client.clientId) || ![JWT_RESOURCE, OPAQUE_RESOURCE].includes(resource)) {
+            if (!Object.hasOwn(PROFILES, client.clientId) || ![JWT_RESOURCE, OPAQUE_RESOURCE, RAG_RESOURCE].includes(resource)) {
               throw new errors.InvalidTarget('Unsupported resource or client.');
             }
-            return { scope: READ_SCOPE, audience: resource, accessTokenTTL: ttl,
-              accessTokenFormat: resource === JWT_RESOURCE ? 'jwt' : 'opaque', jwt: { sign: { alg: 'RS256' } } };
+            return { scope: resource === RAG_RESOURCE ? RAG_SCOPE : READ_SCOPE, audience: resource, accessTokenTTL: ttl,
+              accessTokenFormat: resource === OPAQUE_RESOURCE ? 'opaque' : 'jwt', jwt: { sign: { alg: 'RS256' } } };
           },
         },
       },

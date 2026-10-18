@@ -96,3 +96,14 @@ Useful next milestones are authorization code with PKCE and actual browser
 sessions, persistent issuer storage, key rotation and a separately designed
 client/policy revocation mechanism. SAML and SCIM require their own implementations
 and interoperability tests. They remain planned work.
+
+
+## Connected RAG audience
+
+The companion Enterprise AI Lab is a separate Python resource server. It accepts
+only the dedicated `urn:identity-boundary:rag` JWT audience and `rag:query` scope;
+it obtains keys from this actual issuer's discovery/JWKS. The Node fixture adds
+reader/analyst principals, while the Python resource applies tenant and document
+role permissions before vector top-k. Reports tokens and RAG tokens are not
+interchangeable. The private JSONL bridge transports ephemeral access tokens to
+the parent process, without exporting client secrets or private keys.

@@ -7,3 +7,5 @@
 - Run real HTTP integration tests against the actual local issuer, plus the documented demo. Preserve standard errors and distinguish opaque-token revocation from stateless JWT behavior. Do not imply two different tokens are the same token.
 - Keep dependencies exact and the lockfile committed. Use Node 24 LTS; CI also targets Node 22.
 - Preserve true dates and evidence. Disclose AI assistance; automated checks are not owner review, standards certification, penetration testing or production validation.
+
+- The Enterprise AI Lab RAG companion uses a dedicated JWT audience/scope and private JSONL child bridge. Keep access tokens confined to that explicit IPC and Authorization headers; no raw protocol logs, secret export or caller-supplied identity trust.

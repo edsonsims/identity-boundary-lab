@@ -25,11 +25,15 @@ scope=reports:read
 resource=urn:identity-boundary:reports:jwt
 ```
 
-Use `urn:identity-boundary:reports:opaque` for the introspected format. Unknown
+Use `urn:identity-boundary:reports:opaque` for the introspected reports format.
+The companion RAG resource uses `urn:identity-boundary:rag` with `rag:query` and
+a separately issued JWT. A reports audience or missing RAG scope is refused by
+that Python resource. Unknown
 resources and omitted resource parameters are rejected. Tokens have a maximum
 60-second lifetime and carry server-assigned tenant and role claims.
 
-Client IDs are `reader-alpha`, `reader-beta`, `observer-alpha` and the private
+Client IDs are `reader-alpha`, `reader-beta`, `observer-alpha`, `analyst-alpha`,
+`analyst-beta` and the private
 resource-server client `resource-api`. Secrets are generated for each process.
 The Node example receives them internally; no existing credentials are used or
 printed. `resource-api` can introspect opaque tokens but cannot obtain principal
@@ -95,3 +99,15 @@ against the startup key snapshot until expiry; it does not consult issuer state.
 
 Revoking the opaque token does not revoke its client's separately issued JWT or
 disable the client. The demo reports those separate outcomes explicitly.
+
+
+## Private RAG fixture protocol
+
+`dist/bridge.js` starts the real local issuer for the companion's process harness.
+Its JSONL stdout is a private IPC channel, not a public demo log. Protocol 1 starts
+with issuer/audience/scope metadata; bounded commands issue or revoke tokens,
+simulate issuer outage, and shut down the fixture. Only explicit issue responses
+contain access tokens. Secrets and private signing keys are never transmitted.
+EOF and signals close the issuer; malformed or oversized input cannot echo its
+contents into errors. See `tests/bridge.test.mjs` and the companion's actual HTTP
+integration tests for the tested boundary.

@@ -37,3 +37,13 @@ Browser SSO, authorization code with PKCE, SAML, SCIM, durable issuer storage,
 key rotation and production deployment remain unimplemented. The two token
 formats in the revocation comparison are separately issued tokens with different
 audiences; the documentation retains the provider's structured-JWT limitation.
+
+
+The RAG connection adds a dedicated audience/scope, analyst fixture profiles and
+a bounded private child-process protocol for Enterprise AI Lab. Local Node24.19.0
+verification passes **81 tests**, including 14 new actual issuer-process tests.
+The Python companion separately exercises real HTTP, signatures, dense embeddings,
+vector persistence and tenant/role retrieval; its own CI and recorded observations
+are the evidence for that side. This remains automated verification, not owner
+study or human review. RAG JWTs retain the same offline revocation/key-snapshot
+limitations as other structured access tokens.

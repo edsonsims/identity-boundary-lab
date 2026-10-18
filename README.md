@@ -105,6 +105,36 @@ token endpoint and prints authorized response bodies. Change its requested tenan
 to `beta`, or its client to `observer-alpha`, and inspect the 403 response.
 The complete [HTTP contract](docs/api.md) lists endpoints and errors.
 
+## Connect it to permission-aware RAG
+
+[Enterprise AI Lab](https://github.com/edsonsims/enterprise-ai-lab#run-the-connected-rag-demo)
+now uses this actual issuer for a Python RAG resource. It validates the original
+JWT, queries a persistent Qdrant local store with real MiniLM embeddings, and
+constructs the tenant/role filter before top-k and answer generation.
+
+| Resource | Audience | Scope |
+| --- | --- | --- |
+| Original reports, offline | `urn:identity-boundary:reports:jwt` | `reports:read` |
+| Original reports, online | `urn:identity-boundary:reports:opaque` | `reports:read` |
+| Connected RAG, JWT only | `urn:identity-boundary:rag` | `rag:query` |
+
+A reports token cannot authorize the RAG endpoint. Reader fixtures can retrieve
+general tenant documents; analyst fixtures carry both `reader` and `analyst` roles
+and can also retrieve that tenant's restricted notes. An observer token can be
+issued, but the resource denies it. Scope and tenant checks remain necessary.
+
+Run `npm run build` here, then follow the companion's
+[one-command demo](https://github.com/edsonsims/enterprise-ai-lab#run-the-connected-rag-demo).
+Its process harness starts `dist/bridge.js` through **private child stdio**. The
+JSONL channel deliberately carries ephemeral access tokens to that parent; do not
+pipe it to a public log or save its raw messages. Client secrets and private
+signing keys stay inside the issuer process.
+
+The RAG resource independently fetches discovery/JWKS and validates the JWT; it
+trusts no identity headers injected by a gateway. Its
+[design notes](https://github.com/edsonsims/enterprise-ai-lab/blob/main/docs/identity-rag.md)
+cover permissions, index updates, offline token lifetime and generation limits.
+
 ## What the tests exercise
 
 - Real discovery, public JWKS and client-secret authentication against the local issuer.
