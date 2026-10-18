@@ -1,0 +1,16 @@
+Identity Boundary Lab
+Copyright 2026 Edson Henrique
+
+This repository uses third-party packages under their respective licenses.
+
+- oidc-provider 9.12.2, by Filip Skokan and contributors; MIT.
+  https://github.com/panva/node-oidc-provider/tree/v9.12.2
+- jose 6.2.12, by Filip Skokan and contributors; MIT.
+  https://github.com/panva/jose/tree/v6.2.12
+
+The upstream provider implements OAuth/OIDC protocols. This application is an
+independent local client-credentials and API-policy experiment; upstream
+certification is not certification of this application.
+
+Exact direct and transitive package versions and integrity values are recorded
+in package-lock.json. Dependencies retain their own copyright and license files.

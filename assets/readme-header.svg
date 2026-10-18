@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="310" viewBox="0 0 1200 310" role="img" aria-labelledby="title description">
+<title id="title">Identity Boundary Lab</title><desc id="description">OAuth tokens, tenant policy and revocation tradeoffs. An abstract mint gateway with lavender and coral token illustrations, not a live interface.</desc>
+<defs><clipPath id="edge"><rect width="1200" height="310" rx="22"/></clipPath><pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#ad91ce" opacity=".2"/></pattern></defs>
+<style>@keyframes travel{to{stroke-dashoffset:-28}}@media(prefers-reduced-motion:no-preference){.trail{animation:travel 9s linear infinite}}</style>
+<g clip-path="url(#edge)"><rect width="1200" height="310" fill="#211a34"/><rect x="696.0" width="504.0" height="310" fill="url(#dots)"/>
+<circle cx="1180" cy="60" r="240" fill="none" stroke="#423257"/><circle cx="1180" cy="60" r="205" fill="none" stroke="#423257"/>
+<text x="52" y="46" fill="#bca7dc" font-family="ui-monospace,'Courier New',monospace" font-size="17" letter-spacing="1">OAUTH + TENANT POLICY</text>
+<text x="48" y="148" fill="#fff8ed" font-family="'Arial Black',Arial,sans-serif" font-size="88" font-weight="900" letter-spacing="-3">Identity</text>
+<text x="48" y="230" fill="#fff8ed" font-family="'Arial Black',Arial,sans-serif" font-size="78" font-weight="900" letter-spacing="-3">Boundary Lab<tspan fill="#ff9a83">.</tspan></text>
+<path d="M740 95c38-40 130-45 171-8m117 135c67 10 106-37 94-92" fill="none" stroke="#bda4e4" stroke-width="2" stroke-dasharray="4 10" class="trail"/>
+<g stroke="#171326" stroke-width="3" stroke-linejoin="round">
+<path d="m914 48 49 28v167l-49-28z" fill="#79bea8"/><path d="m963 76 69-40 49 29-69 40z" fill="#bdf1d8"/><path d="m1012 105 69-40v167l-69 40z" fill="#4d9e89"/>
+<path d="m914 48 69-40 49 28-69 40z" fill="#c6f5df"/><path d="m963 76 49 29v167l-49-29z" fill="#8ad0b7"/>
+<path d="m789 105 68 39v89l-68-39z" fill="#a88bda"/><path d="m789 105 20-12 68 39-20 12z" fill="#d7c1f6"/><path d="m857 144 20-12v89l-20 12z" fill="#7858a5"/>
+<path d="m1063 148 68 39v76l-68-39z" fill="#f49d87"/><path d="m1063 148 20-12 68 39-20 12z" fill="#ffc6ad"/><path d="m1131 187 20-12v76l-20 12z" fill="#bd6670"/>
+</g><g fill="none" stroke="#f2e7ff" stroke-width="3" stroke-linecap="round"><path d="m803 157 39 22m-39-7 30 18m235 6 42 24"/></g>
+<ellipse cx="823" cy="143" rx="9" ry="13" transform="rotate(-30 823 143)" fill="#f0e3ff"/>
+<path d="m976 161 10 15 16-13" stroke="#214f41" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="m1101 46 4 12 12 4-12 4-4 12-4-12-12-4 12-4z" fill="#ffae97"/></g></svg>
