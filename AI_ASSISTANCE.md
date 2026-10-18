@@ -33,8 +33,9 @@ client. Upstream OAuth/OIDC support or certification is attributed to the
 third-party library, not claimed for this application.
 
 This milestone implements OAuth client credentials and resource authorization.
-Browser SSO, authorization code with PKCE, SAML, SCIM, durable issuer storage,
-key rotation and production deployment remain unimplemented. The two token
+At that initial milestone, browser sign-in/PKCE, SAML, SCIM, durable issuer
+storage, key rotation and production deployment were unimplemented. The later
+local review milestone below adds browser sign-in and PKCE only. The two token
 formats in the revocation comparison are separately issued tokens with different
 audiences; the documentation retains the provider's structured-JWT limitation.
 
@@ -62,3 +63,22 @@ provider omits unsupported scopes from issued tokens; the tests check the grante
 scopes and the resource independently requires its scope and role. They do not
 assume every unsupported scope request produces an OAuth error. The existing
 reports/RAG audiences and their validation/revocation behavior remain covered.
+
+
+The local browser-review extension was implemented with Codex assistance. It uses
+the actual maintained provider's Authorization Code + PKCE flow, HTML password
+form, signed interaction cookies, role-limited resource grants and RS256 tokens
+with a distinct authenticated-user subject. Fixture passwords come from a private
+mode-0600 local file; neither passwords nor browser tokens are printed by its
+process bridge. The existing client-credentials issuer and bridge are unchanged.
+
+The full Node 24.19.0 run passes **100 tests**, including actual form/token flows
+for five user profiles and negative PKCE, redirect, resource, password, CSRF,
+Origin and account-file cases, actual token expiry, bridge metadata and EOF
+cleanup. The new browser issuer defaults to a 300-second
+user-token lifetime, bounded at 600 seconds; the original service audiences keep
+their 60-second limit. Tests and connected demo interactions are scripted, not
+owner study or evidence of a human's approval. External SSO, MFA, production
+password management, persistent issuer state, key rotation and production
+deployment remain unimplemented. [Browser-review notes](docs/browser-review.md)
+explain the trust boundaries and local-fixture limits.

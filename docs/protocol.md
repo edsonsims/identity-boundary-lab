@@ -18,8 +18,10 @@ The milestone implements the application identity portion of OAuth:
 - [JWT access-token profile, RFC 9068](https://www.rfc-editor.org/rfc/rfc9068)
 
 Library support for OpenID Connect does not make this client-credentials study
-browser SSO. There are no end-user sessions, authorization-code redirects, PKCE,
-SAML assertions or SCIM provisioning flows in this milestone.
+browser SSO. That original experiment has no end-user sessions or browser
+redirects. The separate [browser-review issuer](browser-review.md) now implements
+local password sign-in, authorization-code redirects and PKCE. SAML assertions
+and SCIM provisioning remain unimplemented.
 
 ## Two resources and two tokens
 
@@ -92,9 +94,10 @@ introspection/revocation HTTP endpoints. Separate negative fixtures use controll
 keys to isolate issuer, audience, signature, algorithm, type and time checks.
 This distinguishes protocol integration from direct policy tests.
 
-Useful next milestones are authorization code with PKCE and actual browser
-sessions, persistent issuer storage, key rotation and a separately designed
-client/policy revocation mechanism. SAML and SCIM require their own implementations
+The [browser-review extension](browser-review.md) adds actual local sign-in and
+PKCE while preserving the original service experiment. Next studies include
+persistent issuer storage, key rotation and a separately designed client/policy
+revocation mechanism. SAML and SCIM require their own implementations
 and interoperability tests. They remain planned work.
 
 
@@ -107,3 +110,18 @@ reader/analyst principals, while the Python resource applies tenant and document
 role permissions before vector top-k. Reports tokens and RAG tokens are not
 interchangeable. The private JSONL bridge transports ephemeral access tokens to
 the parent process, without exporting client secrets or private keys.
+
+
+## Local browser-review audience
+
+`review-issuer.ts` is a separate issuer: the only registered client is public
+`review-portal`, and the only resource is `urn:identity-boundary:review`. It
+requires S256 PKCE and one exact loopback callback, checks a local fixture password
+on a CSRF-protected form, then issues user-subject RS256 tokens. Role-bounded
+`review:*` scopes are distinct from all service audiences. Human-interface tokens
+default to 300 seconds and are bounded to 600 seconds; the service-token limits
+above are unchanged. Password hashes, sessions, grants and keys are in memory.
+The portal must independently verify state, nonce, PKCE, ID/access signatures and
+claims, then check document-level tenant/role access and the immutable approval
+snapshot. The [browser protocol](browser-review.md) and Python companion define
+the remaining boundary. Automated sign-in is not a human review record.

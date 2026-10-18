@@ -158,6 +158,25 @@ identity lifecycle. Tokens still expire within 60 seconds and use the resource's
 startup public-key snapshot. The private bridge transports tokens only to its
 parent process; raw messages must not be saved in workflow histories or reports.
 
+## Review documents in a browser
+
+The [local review identity](docs/browser-review.md) adds a **separate real
+Authorization Code + PKCE issuer** for the Enterprise AI Lab review interface.
+Sign in using a generated local fixture password. User tokens carry a distinct
+subject, tenant, roles and review audience; the existing service-token flows
+remain separate. The companion checks document permissions before showing PDFs,
+source spans and audit records or accepting an approval/rejection.
+
+The current local Node 24 suite passes **100 tests**, including actual browser
+form login, PKCE exchanges, user-token scope/tenant/role checks and expiry. These
+are signed-in fixture accounts, not evidence of owner review.
+
+This supports a person using the interface. Automated demo logins are still
+fixture interactions, not evidence that a person performed a review. See the
+[protocol, account profiles and limits](docs/browser-review.md), and the
+[Enterprise AI Lab](https://github.com/edsonsims/enterprise-ai-lab) for the connected
+publication workflow and its recorded integration evidence.
+
 ## What the tests exercise
 
 - Real discovery, public JWKS and client-secret authentication against the local issuer.
@@ -173,11 +192,12 @@ actual provider. See [verification scope](AI_ASSISTANCE.md) for the tested runti
 ## Scope and next steps
 
 Implemented: **machine-to-machine OAuth client credentials**, discovery/JWKS,
-resource audiences, tenant/RBAC/scope policy and the two token-validation modes.
+resource audiences, tenant/RBAC/scope policy and the two token-validation modes;
+a separate **local browser sign-in with Authorization Code + PKCE** for review.
 
-Planned: **browser sign-in/SSO, authorization code + PKCE, SAML, SCIM**, persistent
-issuer storage and key rotation. Client credentials identify an application;
-this milestone does not authenticate a person or implement browser SSO.
+Planned: external SSO/federation, SAML, SCIM, persistent issuer storage and key
+rotation. Client credentials identify an application; the separate browser
+fixture authenticates a local study account.
 
 HTTP is confined to literal `127.0.0.1` with synthetic principals. This is an
 engineering study, not a production identity service, compliance claim or a

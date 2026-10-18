@@ -1,11 +1,27 @@
 {
   "name": "identity-boundary-lab",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "Local OAuth client-credentials, audience, tenant/RBAC and revocation boundary experiments.",
-  "engines": {"node": ">=22.16"},
-  "scripts": {"build":"tsc -p tsconfig.json","test":"npm run build && node --test tests/*.test.mjs","demo":"npm run build && node dist/demo.js","start":"npm run build && node dist/cli.js","bridge":"node dist/bridge.js"},
-  "dependencies": {"jose":"6.2.12","oidc-provider":"9.12.2"},
-  "devDependencies": {"@types/node":"24.19.2","@types/oidc-provider":"9.12.1","typescript":"7.0.2"}
+  "description": "Local OAuth service and browser identity boundaries, tenant/RBAC policy and revocation tradeoffs.",
+  "engines": {
+    "node": ">=22.16"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test tests/*.test.mjs",
+    "demo": "npm run build && node dist/demo.js",
+    "start": "npm run build && node dist/cli.js",
+    "bridge": "node dist/bridge.js",
+    "review-bridge": "node dist/review-bridge.js"
+  },
+  "dependencies": {
+    "jose": "6.2.12",
+    "oidc-provider": "9.12.2"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "@types/oidc-provider": "9.12.1",
+    "typescript": "7.0.2"
+  }
 }
