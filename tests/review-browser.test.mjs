@@ -43,6 +43,9 @@ async function login(issuer, username, suppliedPassword = password) {
   const interaction = new URL(flow.response.headers.get('location'), issuer.url).href;
   const page = await flow.browser.request(interaction);
   assert.equal(page.status, 200);
+  assert.equal(page.headers.get('referrer-policy'), 'same-origin', 'Same-origin HTML form POST must retain its browser Origin.');
+  const formAction = page.headers.get('content-security-policy').split(';').map(value => value.trim()).find(value => value.startsWith('form-action '));
+  assert.equal(formAction, `form-action 'self' ${new URL(issuer.redirectUri).origin}`, 'Form redirect policy permits only self and the statically registered portal origin.');
   const html = await page.text(), csrf = /name="csrf" value="([^"]+)"/.exec(html)[1];
   const response = await flow.browser.request(interaction, {method:'POST', headers:{origin:issuer.url,'content-type':'application/x-www-form-urlencoded'},
     body:new URLSearchParams({csrf,username,password:suppliedPassword})});
@@ -106,6 +109,9 @@ test('wrong passwords and forged interaction CSRF cannot sign in or mint tokens'
   const origin=await wrong.browser.request(wrong.interaction,{method:'POST',headers:{origin:'http://127.0.0.1:12345','content-type':'application/x-www-form-urlencoded'},
     body:new URLSearchParams({csrf:wrong.csrf,username:'reviewer-alpha',password})});
   assert.equal(origin.status,403);
+  const nullOrigin=await wrong.browser.request(wrong.interaction,{method:'POST',headers:{origin:'null','content-type':'application/x-www-form-urlencoded'},
+    body:new URLSearchParams({csrf:wrong.csrf,username:'reviewer-alpha',password})});
+  assert.equal(nullOrigin.status,403,'A null Origin remains forbidden; the browser policy must preserve the real origin.');
   const other=new Browser();
   const cookie=await other.request(wrong.interaction,{method:'POST',headers:{origin:issuer.url,'content-type':'application/x-www-form-urlencoded'},
     body:new URLSearchParams({csrf:wrong.csrf,username:'reviewer-alpha',password})});

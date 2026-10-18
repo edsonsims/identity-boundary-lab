@@ -82,3 +82,22 @@ owner study or evidence of a human's approval. External SSO, MFA, production
 password management, persistent issuer state, key rotation and production
 deployment remain unimplemented. [Browser-review notes](docs/browser-review.md)
 explain the trust boundaries and local-fixture limits.
+
+
+Actual rendered-browser verification in the Enterprise companion found a login
+failure that the direct HTTP test did not reproduce: `Referrer-Policy:
+no-referrer` made Chromium send `Origin: null` on the password form POST, which
+the issuer correctly refused. The interaction responses now use `same-origin`
+referrer policy, retaining the actual same-origin Origin without exposing a
+referrer across origins. The strict Origin and interaction CSRF checks remain;
+`Origin: null` is still rejected. Node regressions assert the response policy
+and explicit null-Origin refusal; the separate real Chromium run verifies the
+rendered form behavior. This repair was drafted with Codex assistance.
+
+A second rendered-browser check found that Chromium also applies CSP
+`form-action` to redirects after form submission. The initial self-only policy
+blocked the issuer's valid redirect back to its registered portal. Interaction
+HTML now permits only self and that one statically registered loopback portal
+origin. The provider's exact callback validation and the form's Origin/CSRF
+checks remain intact; no wildcard or browser-selected destination is admitted.
+A regression asserts the complete form-action directive.

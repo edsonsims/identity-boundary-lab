@@ -56,10 +56,10 @@ function loadAccounts(path: string): Map<ReviewUsername, PasswordRecord> {
   } finally { closeSync(fd); }
 }
 function escape(value: string): string { return value.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!); }
-function headers(response: ServerResponse, status: number, type = 'text/html; charset=utf-8') {
+function headers(response: ServerResponse, status: number, type = 'text/html; charset=utf-8', formRedirectOrigin?: string) {
   response.writeHead(status, { 'content-type': type, 'cache-control': 'no-store', 'pragma': 'no-cache',
-    'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
-    'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer', 'x-frame-options': 'DENY' });
+    'content-security-policy': `default-src 'none'; style-src 'unsafe-inline'; form-action 'self'${formRedirectOrigin ? " " + formRedirectOrigin : ""}; frame-ancestors 'none'; base-uri 'none'`,
+    'x-content-type-options': 'nosniff', 'referrer-policy': 'same-origin', 'x-frame-options': 'DENY' });
 }
 async function body(request: IncomingMessage): Promise<URLSearchParams> {
   if (request.headers['content-type']?.split(';')[0] !== 'application/x-www-form-urlencoded') throw new Error('Invalid form.');
@@ -96,7 +96,9 @@ export async function startReviewIssuer(options: { redirectUri: string; accounts
       if (request.method === 'GET') {
         if (!form) { if (forms.size >= 256) { headers(response, 503); response.end('Try again later.'); return; }
           form = { csrf: randomBytes(32).toString('base64url'), deadline: Date.now() + 300000, attempts: 0 }; forms.set(uid, form); }
-        headers(response, 200);
+        // Chromium checks form-action again on the provider's redirect chain.
+        // Permit only this client's statically registered loopback portal.
+        headers(response, 200, 'text/html; charset=utf-8', redirect.origin);
         const consent = details.prompt.name === 'consent';
         response.end(`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Identity Boundary · local sign-in</title><style>body{font:17px system-ui;background:#ece8ff;color:#1c1730;max-width:420px;margin:8vh auto;padding:24px}main{background:white;border:2px solid;padding:28px;box-shadow:7px 7px #7354ce}h1{font-size:28px}label{display:block;margin:18px 0}input,button{box-sizing:border-box;width:100%;padding:12px;font:inherit;border:1px solid}button{background:#7354ce;color:white;cursor:pointer}small{display:block;line-height:1.6}</style><main><small>IDENTITY BOUNDARY LAB · LOCAL FIXTURE</small><h1>${consent ? 'Continue to review' : 'Sign in to review'}</h1><p>Local study accounts only. Use the generated fixture credentials.</p><form method="post" action="/interaction/${escape(uid)}"><input type="hidden" name="csrf" value="${form.csrf}">${consent ? '' : '<label>Username<input name="username" autocomplete="username" required maxlength="96"></label><label>Password<input name="password" type="password" autocomplete="current-password" required maxlength="128"></label>'}<button type="submit">${consent ? 'Continue' : 'Sign in'}</button></form><p><small>Authorization Code + PKCE. No external identity service. This fixture is not production authentication.</small></p></main></html>`); return;
       }

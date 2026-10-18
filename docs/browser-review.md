@@ -10,7 +10,13 @@ validates the registered redirect and code challenge; the portal then redeems
 the one-use code and independently verifies the ID/access tokens. The portal
 must check its own state, nonce, PKCE verifier, issuer/audience and callback.
 The provider's signed interaction cookie plus an interaction-specific CSRF token
-protect the password form. A cross-origin form submission is rejected.
+protect the password form. The form uses `Referrer-Policy: same-origin`, so a
+real same-origin browser POST retains its Origin while cross-origin referrers
+are suppressed. A cross-origin or `Origin: null` form submission is rejected.
+The form CSP permits `form-action 'self'` plus only the statically registered
+portal origin: Chromium applies that directive to the authorization redirect
+chain as well. The provider still requires the one exact registered callback
+URI; no browser parameter can add an allowed form origin.
 
 ## Start the private fixture
 
