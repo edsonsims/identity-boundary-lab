@@ -13,7 +13,7 @@ opaque token's revocation; an offline verifier keeps accepting a separately
 issued, unexpired JWT.
 
 [Protocol & decisions](docs/protocol.md) · [HTTP contract](docs/api.md) ·
-[Tests](tests) · [Assistance & verification](AI_ASSISTANCE.md)
+[Tests](tests)
 
 ## Run the experiment
 
@@ -187,7 +187,7 @@ publication workflow and its recorded integration evidence.
 
 Crypto-negative cases use controlled fixture signing keys to isolate each claim
 check. They are separate from the positive cases that obtain tokens from the
-actual provider. See [verification scope](AI_ASSISTANCE.md) for the tested runtime.
+actual provider.
 
 ## Scope and next steps
 
@@ -204,4 +204,4 @@ engineering study, not a production identity service, compliance claim or a
 certified OAuth/OIDC deployment. [Protocol notes](docs/protocol.md) document
 availability, key-cache, revocation and transport limits.
 
-[MIT license](LICENSE) · [Third-party notices](NOTICE) · [AI assistance](AI_ASSISTANCE.md)
+[MIT license](LICENSE) · [Third-party notices](NOTICE)
