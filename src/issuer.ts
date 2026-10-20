@@ -9,6 +9,13 @@ export const OPAQUE_RESOURCE = 'urn:identity-boundary:reports:opaque';
 export const READ_SCOPE = 'reports:read';
 export const RAG_RESOURCE = 'urn:identity-boundary:rag';
 export const RAG_SCOPE = 'rag:query';
+export const PRIVACY_RESOURCE = 'urn:identity-boundary:privacy';
+export const PRIVACY_REDACT = 'privacy:redact';
+export const PRIVACY_RESTORE = 'privacy:restore';
+export function privacyScopes(roles: readonly string[]): string {
+  return [...(roles.includes('redactor') ? [PRIVACY_REDACT] : []),
+    ...(roles.includes('restorer') ? [PRIVACY_RESTORE] : [])].join(' ');
+}
 export const APPROVAL_RESOURCE = 'urn:identity-boundary:approval';
 export const APPROVAL_READ = 'approval:read';
 export const APPROVAL_REQUEST = 'approval:request';
@@ -29,6 +36,10 @@ export const PROFILES = Object.freeze({
   'approver-alpha': Object.freeze({ tenantId: 'alpha', roles: Object.freeze(['approver']) }),
   'approver-beta': Object.freeze({ tenantId: 'beta', roles: Object.freeze(['approver']) }),
   'dual-alpha': Object.freeze({ tenantId: 'alpha', roles: Object.freeze(['requester', 'approver']) }),
+  'privacy-alpha': Object.freeze({ tenantId: 'alpha', roles: Object.freeze(['redactor', 'restorer']) }),
+  'privacy-beta': Object.freeze({ tenantId: 'beta', roles: Object.freeze(['redactor', 'restorer']) }),
+  'privacy-other-alpha': Object.freeze({ tenantId: 'alpha', roles: Object.freeze(['redactor', 'restorer']) }),
+  'privacy-redactor-alpha': Object.freeze({ tenantId: 'alpha', roles: Object.freeze(['redactor']) }),
 });
 export type FixtureClientId = keyof typeof PROFILES;
 export interface Credential { clientId: string; clientSecret: string }
@@ -71,11 +82,11 @@ export async function startIssuer(options: { port?: number; signingJwk?: JWK; tt
           enabled: true,
           defaultResource: () => { throw new errors.InvalidTarget('Provide an explicit supported resource.'); },
           getResourceServerInfo: (_ctx, resource, client) => {
-            if (!Object.hasOwn(PROFILES, client.clientId) || ![JWT_RESOURCE, OPAQUE_RESOURCE, RAG_RESOURCE, APPROVAL_RESOURCE].includes(resource)) {
+            if (!Object.hasOwn(PROFILES, client.clientId) || ![JWT_RESOURCE, OPAQUE_RESOURCE, RAG_RESOURCE, APPROVAL_RESOURCE, PRIVACY_RESOURCE].includes(resource)) {
               throw new errors.InvalidTarget('Unsupported resource or client.');
             }
             const profile = PROFILES[client.clientId as FixtureClientId];
-            return { scope: resource === APPROVAL_RESOURCE ? approvalScopes(profile.roles) : resource === RAG_RESOURCE ? RAG_SCOPE : READ_SCOPE, audience: resource, accessTokenTTL: ttl,
+            return { scope: resource === PRIVACY_RESOURCE ? privacyScopes(profile.roles) : resource === APPROVAL_RESOURCE ? approvalScopes(profile.roles) : resource === RAG_RESOURCE ? RAG_SCOPE : READ_SCOPE, audience: resource, accessTokenTTL: ttl,
               accessTokenFormat: resource === OPAQUE_RESOURCE ? 'opaque' : 'jwt', jwt: { sign: { alg: 'RS256' } } };
           },
         },

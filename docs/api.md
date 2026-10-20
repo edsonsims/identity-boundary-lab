@@ -32,9 +32,12 @@ that Python resource. Unknown
 resources and omitted resource parameters are rejected. Tokens have a maximum
 60-second lifetime and carry server-assigned tenant and role claims.
 
-Client IDs are `reader-alpha`, `reader-beta`, `observer-alpha`, `analyst-alpha`,
-`analyst-beta` and the private
-resource-server client `resource-api`. Secrets are generated for each process.
+Registered service fixture IDs are `reader-alpha`, `reader-beta`,
+`observer-alpha`, `analyst-alpha`, `analyst-beta`, `requester-alpha`,
+`requester-beta`, `approver-alpha`, `approver-beta`, `dual-alpha`,
+`privacy-alpha`, `privacy-beta`, `privacy-other-alpha` and
+`privacy-redactor-alpha`, plus the private resource-server client `resource-api`.
+Secrets are generated for each process.
 The Node example receives them internally; no existing credentials are used or
 printed. `resource-api` can introspect opaque tokens but cannot obtain principal
 tokens. Other clients cannot introspect a token's active state or revoke tokens
@@ -111,3 +114,26 @@ contain access tokens. Secrets and private signing keys are never transmitted.
 EOF and signals close the issuer; malformed or oversized input cannot echo its
 contents into errors. See `tests/bridge.test.mjs` and the companion's actual HTTP
 integration tests for the tested boundary.
+
+The protocol's ready metadata and omitted-resource default remain the RAG
+audience with `rag:query`. An explicit privacy request uses the separate audience:
+
+```json
+{"id":"privacy-example","op":"issue","clientId":"privacy-redactor-alpha","resource":"urn:identity-boundary:privacy"}
+```
+
+When `scope` is omitted for this resource, `redactor` grants `privacy:redact` and
+`restorer` grants `privacy:restore`. The combined `privacy-alpha`, `privacy-beta`
+and `privacy-other-alpha` profiles have both roles; `privacy-redactor-alpha` has
+only redactor. The first, third and fourth profiles belong to Alpha; `privacy-beta`
+belongs to Beta. `observer-alpha` has neither privacy scope. Explicitly requested
+unsupported scopes are omitted by the provider; callers must inspect the actual
+response and signed grants, and the companion still enforces scope and role.
+
+The Python companion validates the privacy signature/audience/expiry before
+comparing the path tenant with the signed tenant. Restoration additionally
+requires the same signed client and unexpired mapping context. Identity claims
+cannot be supplied through bridge command fields or token-request parameters.
+Privacy tokens remain RS256 service JWTs with a maximum 60-second lifetime; they
+do not add browser authentication, external identity services or a new token
+revocation mechanism. Never save the bridge's token-bearing responses as logs.

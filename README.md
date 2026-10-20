@@ -118,6 +118,7 @@ constructs the tenant/role filter before top-k and answer generation.
 | Original reports, online | `urn:identity-boundary:reports:opaque` | `reports:read` |
 | Connected RAG, JWT only | `urn:identity-boundary:rag` | `rag:query` |
 | Durable approval, JWT only | `urn:identity-boundary:approval` | `approval:request`, `approval:read`, `approval:decide` |
+| Local privacy companion, JWT only | `urn:identity-boundary:privacy` | `privacy:redact`, `privacy:restore`, bounded by role |
 
 A reports token cannot authorize the RAG endpoint. Reader fixtures can retrieve
 general tenant documents; analyst fixtures carry both `reader` and `analyst` roles
@@ -158,6 +159,33 @@ identity lifecycle. Tokens still expire within 60 seconds and use the resource's
 startup public-key snapshot. The private bridge transports tokens only to its
 parent process; raw messages must not be saved in workflow histories or reports.
 
+### Redact locally and restore in the same context
+
+The [Enterprise AI Lab privacy companion](https://github.com/edsonsims/enterprise-ai-lab)
+uses the dedicated privacy JWT audience. Its fixtures have server-assigned roles:
+
+| Client | Tenant | Roles | Available privacy scopes |
+| --- | --- | --- | --- |
+| `privacy-alpha` | `alpha` | `redactor`, `restorer` | `privacy:redact`, `privacy:restore` |
+| `privacy-beta` | `beta` | `redactor`, `restorer` | `privacy:redact`, `privacy:restore` |
+| `privacy-other-alpha` | `alpha` | `redactor`, `restorer` | `privacy:redact`, `privacy:restore` |
+| `privacy-redactor-alpha` | `alpha` | `redactor` | `privacy:redact` |
+
+The resource independently checks both the operation's role and scope. Restoring
+a mapped value also requires its original **tenant, client and unexpired context**;
+the second Alpha client cannot restore the first client's mappings. An observer
+receives no privacy scopes, and a redactor cannot obtain restoration permission
+by requesting a wider scope. Inspect the actual granted scopes: unsupported
+requests can yield a token with those scopes omitted.
+
+These are generated-secret service identities, with the same 60-second maximum
+token lifetime and startup JWKS snapshot as the other service flows. RAG, reports,
+approval and browser-review tokens cannot authorize the privacy resource. The
+companion uses fictional text, narrow deterministic detectors and a private local
+mapping database; its process demo sends redacted text to a loopback test processor.
+No external provider or real personal-data evaluation is represented, and this
+does not establish comprehensive PII detection or privacy compliance.
+
 ## Review documents in a browser
 
 The [local review identity](docs/browser-review.md) adds a **separate real
@@ -167,7 +195,7 @@ subject, tenant, roles and review audience; the existing service-token flows
 remain separate. The companion checks document permissions before showing PDFs,
 source spans and audit records or accepting an approval/rejection.
 
-The current local Node 24 suite passes **100 tests**, including actual browser
+The current local Node 24 suite passes **111 tests**, including actual browser
 form login, PKCE exchanges, user-token scope/tenant/role checks and expiry. These
 are signed-in fixture accounts, not evidence of owner review.
 
@@ -184,6 +212,7 @@ publication workflow and its recorded integration evidence.
 - Wrong issuer/audience/algorithm/signature/type, missing claims and expired tokens.
 - Duplicate/malformed/oversized authorization headers and rejected query-token transport.
 - Issuer outage, bounded response bodies/deadlines, redirect refusal and injected discovery endpoints.
+- Privacy JWT role-bound grants, tenant/client claims, cross-audience rejection and private bridge defaults.
 
 Crypto-negative cases use controlled fixture signing keys to isolate each claim
 check. They are separate from the positive cases that obtain tokens from the

@@ -1,6 +1,7 @@
 /** Private child-process fixture for Enterprise AI Lab; stdout is a JSONL IPC channel. */
 import { once } from 'node:events';
 import { JWT_RESOURCE, OPAQUE_RESOURCE, PROFILES, RAG_RESOURCE, RAG_SCOPE, READ_SCOPE, APPROVAL_RESOURCE, approvalScopes,
+  PRIVACY_RESOURCE, privacyScopes,
   startIssuer, type FixtureClientId } from './issuer.js';
 import { discover, OAuthClient } from './oauth.js';
 
@@ -77,9 +78,10 @@ async function main(): Promise<void> {
         if (command.op === 'issue') {
           const resource = command.resource ?? RAG_RESOURCE;
           if (!exactKeys(command, ['id', 'op', 'clientId', 'resource', 'scope'])
-              || typeof resource !== 'string' || ![JWT_RESOURCE, OPAQUE_RESOURCE, RAG_RESOURCE, APPROVAL_RESOURCE].includes(resource)
+              || typeof resource !== 'string' || ![JWT_RESOURCE, OPAQUE_RESOURCE, RAG_RESOURCE, APPROVAL_RESOURCE, PRIVACY_RESOURCE].includes(resource)
               || (command.scope !== undefined && (typeof command.scope !== 'string' || command.scope.length > 256))) return invalid();
-          const scope = typeof command.scope === 'string' ? command.scope : (resource === APPROVAL_RESOURCE
+          const scope = typeof command.scope === 'string' ? command.scope : (resource === PRIVACY_RESOURCE
+            ? privacyScopes(PROFILES[command.clientId as FixtureClientId].roles) : resource === APPROVAL_RESOURCE
             ? approvalScopes(PROFILES[command.clientId as FixtureClientId].roles) : resource === RAG_RESOURCE ? RAG_SCOPE : READ_SCOPE);
           const token = await principal.issue(resource, scope);
           await emit({ id, ok: true, token });
